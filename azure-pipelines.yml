@@ -1,0 +1,29 @@
+trigger:
+- main
+
+variables:
+  imageName: java-maven-app
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: Maven@4
+  displayName: Build Maven Java Application
+  inputs:
+    mavenPomFile: pom.xml
+    goals: clean package
+    options: -DskipTests
+    javaHomeOption: JDKVersion
+    jdkVersionOption: '1.17'
+
+- task: Docker@2
+  displayName: Build and Push Docker Image to ACR
+  inputs:
+    command: buildAndPush
+    repository: $(imageName)
+    dockerfile: Dockerfile
+    containerRegistry: ACR-Service-Connection
+    tags: |
+      latest
+      $(Build.BuildId)
